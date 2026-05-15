@@ -25,7 +25,14 @@ public with sharing class CaseStatusNotificationService {
         }
 
         for (Case updatedCase : updatedCases) {
-            notificationClient.notifyCaseStatusChanged(updatedCase);
+            try {
+                notificationClient.notifyCaseStatusChanged(updatedCase);
+            } catch (Exception ex) {
+                System.debug(
+                    LoggingLevel.ERROR,
+                    'Failed to notify external service: ' + ex.getMessage()
+                );
+            }
         }
     }
 }
