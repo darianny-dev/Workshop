@@ -7,11 +7,25 @@
 **/
 public with sharing class CaseStatusTransitionEvaluator {
 
-    public static String determineNextStatus(
+    private ICaseStatusTransitionRuleProvider ruleProvider;
+
+    public CaseStatusTransitionEvaluator() {
+        this.ruleProvider =
+            new DefaultCaseStatusTransitionRuleProvider();
+    }
+
+    public CaseStatusTransitionEvaluator(
+        ICaseStatusTransitionRuleProvider ruleProvider
+    ) {
+        this.ruleProvider = ruleProvider;
+    }
+
+    public String determineNextStatus(
         Decimal paidPercentage,
         String currentStatus
     ) {
-        if (paidPercentage == null || String.isBlank(currentStatus)) {
+        if (paidPercentage == null ||
+            String.isBlank(currentStatus)) {
             return null;
         }
 
@@ -19,8 +33,12 @@ public with sharing class CaseStatusTransitionEvaluator {
             return null;
         }
 
-        if (paidPercentage >= 75) {
-            return 'Compliance Call';
+        for (CaseStatusTransitionRule rule :
+            ruleProvider.getRules()) {
+
+            if (paidPercentage >= rule.minimumPaidPercentage) {
+                return rule.targetStatus;
+            }
         }
 
         return null;
