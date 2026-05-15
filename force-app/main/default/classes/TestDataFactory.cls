@@ -8,6 +8,11 @@
 @IsTest
 public class TestDataFactory {
 
+    public static Id getFakeId(Schema.SObjectType sObjectType) {
+        String keyPrefix = sObjectType.getDescribe().getKeyPrefix();
+        return Id.valueOf(keyPrefix + '000000000001AAA');
+    }
+
     public static Account createAccount() {
         Account acct = new Account(
             Name = 'Test Account'

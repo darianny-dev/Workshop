@@ -40,11 +40,12 @@ public with sharing class OpportunityPaymentStatusService {
         ];
 
         List<Case> casesToUpdate = new List<Case>();
+        CaseStatusTransitionEvaluator evaluator = new CaseStatusTransitionEvaluator();
 
         for (Case relatedCase : relatedCases) {
             Opportunity relatedOpp = opportunitiesById.get(relatedCase.Opportunity__c);
 
-            String nextStatus = CaseStatusTransitionEvaluator.determineNextStatus(
+            String nextStatus = evaluator.determineNextStatus(
                 relatedOpp.Paid_Percentage__c,
                 relatedCase.Status
             );
