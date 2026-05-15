@@ -15,10 +15,16 @@ public with sharing class OpportunityPaymentStatusService {
             return;
         }
 
+        Map<Id, Opportunity> opportunitiesById = new Map<Id, Opportunity>();
         Set<Id> opportunityIds = new Set<Id>();
 
         for (Opportunity opp : newList) {
+            if (opp.Id == null || opp.Paid_Percentage__c == null) {
+                continue;
+            }
+
             if (opp.Paid_Percentage__c >= 75) {
+                opportunitiesById.put(opp.Id, opp);
                 opportunityIds.add(opp.Id);
             }
         }
@@ -35,20 +41,22 @@ public with sharing class OpportunityPaymentStatusService {
 
         List<Case> casesToUpdate = new List<Case>();
 
-        for (Case c : relatedCases) {
-            Opportunity relatedOpp = opportunitiesById.get(c.Opportunity__c);
+        for (Case relatedCase : relatedCases) {
+            Opportunity relatedOpp = opportunitiesById.get(relatedCase.Opportunity__c);
 
             String nextStatus = CaseStatusTransitionEvaluator.determineNextStatus(
                 relatedOpp.Paid_Percentage__c,
-                c.Status
+                relatedCase.Status
             );
 
-            if (nextStatus != null) {
-                casesToUpdate.add(new Case(
-                    Id = c.Id,
-                    Status = nextStatus
-                ));
+            if (nextStatus == null) {
+                continue;
             }
+
+            casesToUpdate.add(new Case(
+                Id = relatedCase.Id,
+                Status = nextStatus
+            ));
         }
 
         if (!casesToUpdate.isEmpty()) {
