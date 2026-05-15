@@ -12,8 +12,15 @@ private class OpportunityPaymentStatusServiceTest {
     static void shouldUpdateCaseStatus_WhenOpportunityMeetsPaymentThreshold() {
         Account acct = TestDataFactory.createAccount();
 
-        Opportunity opp = TestDataFactory.createOpportunity(acct.Id, 75);
-        Case relatedCase = TestDataFactory.createCase(opp.Id, 'New');
+        Opportunity opp = new TestDataFactory.OpportunityBuilder()
+            .withAccountId(acct.Id)
+            .withPaidAmount(75)
+            .insertRecord();
+
+        Case relatedCase = new TestDataFactory.CaseBuilder()
+            .withOpportunityId(opp.Id)
+            .withStatus('New')
+            .insertRecord();
 
         Test.startTest();
         OpportunityPaymentStatusService.process(
@@ -21,7 +28,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Percentage__c = 0
+                    Paid_Amount__c = 0
                 )
             }
         );
@@ -44,12 +51,15 @@ private class OpportunityPaymentStatusServiceTest {
     static void shouldNotUpdateCaseStatus_WhenPaymentThresholdIsNotMet() {
         Account acct = TestDataFactory.createAccount();
 
-        Opportunity opp = TestDataFactory.createOpportunity(acct.Id, 50);
+        Opportunity opp = new TestDataFactory.OpportunityBuilder()
+            .withAccountId(acct.Id)
+            .withPaidAmount(50)
+            .insertRecord();
 
-        Case relatedCase = TestDataFactory.createCase(
-            opp.Id,
-            'New'
-        );
+        Case relatedCase = new TestDataFactory.CaseBuilder()
+            .withOpportunityId(opp.Id)
+            .withStatus('New')
+            .insertRecord();
 
         Test.startTest();
 
@@ -58,7 +68,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Percentage__c = 0
+                    Paid_Amount__c = 0
                 )
             }
         );
@@ -82,12 +92,15 @@ private class OpportunityPaymentStatusServiceTest {
     static void shouldNotUpdateClosedCase_WhenOpportunityMeetsThreshold() {
         Account acct = TestDataFactory.createAccount();
 
-        Opportunity opp = TestDataFactory.createOpportunity(acct.Id, 75);
+        Opportunity opp = new TestDataFactory.OpportunityBuilder()
+            .withAccountId(acct.Id)
+            .withPaidAmount(75)
+            .insertRecord();
 
-        Case relatedCase = TestDataFactory.createCase(
-            opp.Id,
-            'Closed'
-        );
+        Case relatedCase = new TestDataFactory.CaseBuilder()
+            .withOpportunityId(opp.Id)
+            .withStatus('Closed')
+            .insertRecord();
 
         Test.startTest();
 
@@ -96,7 +109,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Percentage__c = 0
+                    Paid_Amount__c = 0
                 )
             }
         );
@@ -120,7 +133,10 @@ private class OpportunityPaymentStatusServiceTest {
     static void shouldNotFail_WhenOpportunityHasNoRelatedCase() {
         Account acct = TestDataFactory.createAccount();
 
-        Opportunity opp = TestDataFactory.createOpportunity(acct.Id, 75);
+        Opportunity opp = new TestDataFactory.OpportunityBuilder()
+            .withAccountId(acct.Id)
+            .withPaidAmount(75)
+            .insertRecord();
 
         Test.startTest();
 
@@ -129,7 +145,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Percentage__c = 0
+                    Paid_Amount__c = 0
                 )
             }
         );
@@ -146,12 +162,15 @@ private class OpportunityPaymentStatusServiceTest {
     static void shouldNotUpdateCaseStatus_WhenPaidPercentageIsNull() {
         Account acct = TestDataFactory.createAccount();
 
-        Opportunity opp = TestDataFactory.createOpportunity(acct.Id, null);
+        Opportunity opp = new TestDataFactory.OpportunityBuilder()
+            .withAccountId(acct.Id)
+            .insertRecord();
+        opp.Paid_Amount__c = null;
 
-        Case relatedCase = TestDataFactory.createCase(
-            opp.Id,
-            'New'
-        );
+        Case relatedCase = new TestDataFactory.CaseBuilder()
+            .withOpportunityId(opp.Id)
+            .withStatus('New')
+            .insertRecord();
 
         Test.startTest();
 
@@ -160,7 +179,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Percentage__c = 0
+                    Paid_Amount__c = 0
                 )
             }
         );
@@ -178,5 +197,72 @@ private class OpportunityPaymentStatusServiceTest {
             updatedCase.Status,
             'Case status should not change when paid percentage is null.'
         );
+    }
+
+    @IsTest
+    static void shouldUpdateCases_WhenProcessing200Opportunities() {
+        Account acct = TestDataFactory.createAccount();
+
+        List<Opportunity> opportunities = new List<Opportunity>();
+        List<Case> cases = new List<Case>();
+
+        for (Integer i = 0; i < 200; i++) {
+            opportunities.add(
+                new TestDataFactory.OpportunityBuilder()
+                    .withAccountId(acct.Id)
+                    .withPaidAmount(75)
+                    .insertRecord()
+                    .build()
+            );
+        }
+        insert opportunities;
+
+        for (Opportunity opp : opportunities) {
+            cases.add(
+                new TestDataFactory.CaseBuilder()
+                    .withOpportunityId(opp.Id)
+                    .withStatus('New')
+                    .build()
+            );
+        }
+        insert cases;
+
+        Map<Id, Opportunity> oldMap = new Map<Id, Opportunity>();
+        for (Opportunity opp : opportunities) {
+            oldMap.put(
+                opp.Id,
+                new Opportunity(
+                    Id = opp.Id,
+                    Paid_Amount__c = 0
+                )
+            );
+        }
+
+        Test.startTest();
+        OpportunityPaymentStatusService.process(
+            opportunities,
+            oldMap
+        );
+        Test.stopTest();
+
+        List<Case> updatedCases = [
+            SELECT Status
+            FROM Case
+            WHERE Id IN :cases
+        ];
+
+        Assert.areEqual(
+            200,
+            updatedCases.size(),
+            'All related Cases should be queried.'
+        );
+
+        for (Case updatedCase : updatedCases) {
+            Assert.areEqual(
+                'Compliance Call',
+                updatedCase.Status,
+                'Each Case should be updated when its Opportunity meets the threshold.'
+            );
+        }
     }
 }

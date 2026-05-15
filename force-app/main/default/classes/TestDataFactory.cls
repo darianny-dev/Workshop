@@ -17,55 +17,99 @@ public class TestDataFactory {
         Account acct = new Account(
             Name = 'Test Account'
         );
+
         insert acct;
         return acct;
     }
 
-    public static Opportunity createOpportunity(Id accountId, Decimal paidPercentage) {
-        Opportunity opp = new Opportunity(
-            Name = 'Test Opportunity',
-            AccountId = accountId,
-            StageName = 'Prospecting',
-            CloseDate = Date.today().addDays(30),
-            Paid_Percentage__c = paidPercentage
-        );
-        insert opp;
-        return opp;
+    public class CaseBuilder {
+        private Case caseRecord;
+
+        public CaseBuilder() {
+            caseRecord = new Case(
+                Subject = 'Test Case',
+                Status = 'New',
+                Origin = 'Phone'
+            );
+        }
+
+        public CaseBuilder withOpportunityId(Id opportunityId) {
+            caseRecord.Opportunity__c = opportunityId;
+            return this;
+        }
+
+        public CaseBuilder withSubject(String value) {
+            caseRecord.Subject = value;
+            return this;
+        }
+
+        public CaseBuilder withStatus(String value) {
+            caseRecord.Status = value;
+            return this;
+        }
+
+        public CaseBuilder withOrigin(String value) {
+            caseRecord.Origin = value;
+            return this;
+        }
+
+        public Case build() {
+            return caseRecord;
+        }
+
+        public Case insertRecord() {
+            insert caseRecord;
+            return caseRecord;
+        }
     }
 
-    public static Case createCase(Id opportunityId, String status) {
-        Case c = new Case(
-            Subject = 'Test Case',
-            Status = status,
-            Origin = 'Phone',
-            Opportunity__c = opportunityId
-        );
-        insert c;
-        return c;
-    }
+    public class OpportunityBuilder {
+        private Opportunity opp;
 
-    public static Opportunity buildOpportunity(
-        Id accountId,
-        Decimal paidPercentage
-    ) {
-        return new Opportunity(
-            Name = 'Test Opportunity',
-            AccountId = accountId,
-            StageName = 'Prospecting',
-            CloseDate = Date.today().addDays(30),
-            Paid_Percentage__c = paidPercentage
-        );
-    }
+        public OpportunityBuilder() {
+            Account acct = TestDataFactory.createAccount();
 
-    public static Case buildCase(
-        Id opportunityId,
-        String status
-    ) {
-        return new Case(
-            Subject = 'Test Case',
-            Status = status,
-            Origin = 'Phone',
-            Opportunity__c = opportunityId
-        );
+            opp = new Opportunity(
+                Name = 'Test Opportunity',
+                AccountId = acct.Id,
+                StageName = 'Prospecting',
+                CloseDate = Date.today().addDays(30),
+                Paid_Amount__c = 0
+            );
+        }
+
+        public OpportunityBuilder withAccountId(Id accountId) {
+            opp.AccountId = accountId;
+            return this;
+        }
+
+        public OpportunityBuilder withName(String value) {
+            opp.Name = value;
+            return this;
+        }
+
+        public OpportunityBuilder withStageName(String value) {
+            opp.StageName = value;
+            return this;
+        }
+
+        public OpportunityBuilder withCloseDate(Date value) {
+            opp.CloseDate = value;
+            return this;
+        }
+
+        public OpportunityBuilder withPaidAmount(Decimal value) {
+            opp.Paid_Amount__c = value;
+            return this;
+        }
+
+        public Opportunity build() {
+            return opp;
+        }
+
+        public Opportunity insertRecord() {
+            insert opp;
+            return opp;
+        }
     }
 }
