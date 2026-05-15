@@ -8,5 +8,4 @@
 public interface IExternalNotificationClient {
 
     void notifyCaseStatusChanged(Case updatedCase);
-
 }

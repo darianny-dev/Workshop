@@ -5,8 +5,7 @@
  * @last modified on  : 05-15-2026
  * @last modified by  : darianny@theradical1s.com
 **/
-public with sharing class ExternalNotificationClient
-implements IExternalNotificationClient {
+public with sharing class ExternalNotificationClient implements IExternalNotificationClient {
 
     public void notifyCaseStatusChanged(Case updatedCase) {
         // TODO

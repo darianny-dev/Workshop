@@ -5,8 +5,7 @@
  * @last modified on  : 05-15-2026
  * @last modified by  : darianny@theradical1s.com
 **/
-public with sharing class DefaultCaseStatusTransitionRuleProvider
-implements ICaseStatusTransitionRuleProvider {
+public with sharing class DefaultCaseStatusTransitionRuleProvider implements ICaseStatusTransitionRuleProvider {
 
     public List<CaseStatusTransitionRule> getRules() {
         return new List<CaseStatusTransitionRule>{

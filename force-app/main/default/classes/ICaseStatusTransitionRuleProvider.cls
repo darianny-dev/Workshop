@@ -8,5 +8,4 @@
 public interface ICaseStatusTransitionRuleProvider {
 
     List<CaseStatusTransitionRule> getRules();
-
 }
