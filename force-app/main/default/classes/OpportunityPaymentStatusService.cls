@@ -62,6 +62,11 @@ public with sharing class OpportunityPaymentStatusService {
 
         if (!casesToUpdate.isEmpty()) {
             update casesToUpdate;
+
+            CaseStatusNotificationService notificationService =
+                new CaseStatusNotificationService();
+
+            notificationService.notifyStatusChanges(casesToUpdate);
         }
     }
 }
