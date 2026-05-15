@@ -45,4 +45,36 @@ private class CaseStatusNotificationServiceTest {
             'Notification should be sent for the updated Case.'
         );
     }
+
+    @IsTest
+    static void shouldNotBreakProcess_WhenExternalNotificationFails() {
+        Case testCase = new Case(
+            Id = TestDataFactory.getFakeId(Case.SObjectType),
+            Status = 'Compliance Call'
+        );
+
+        CaseStatusNotificationService service =
+            new CaseStatusNotificationService(
+                new FailingNotificationClient()
+            );
+
+        Test.startTest();
+
+        service.notifyStatusChanges(
+            new List<Case>{ testCase }
+        );
+
+        Test.stopTest();
+
+        Assert.isTrue(
+            true,
+            'Notification failures should be handled without breaking the main process.'
+        );
+    }
+
+    private class FailingNotificationClient implements IExternalNotificationClient {
+        public void notifyCaseStatusChanged(Case updatedCase) {
+            throw new CalloutException('Simulated external service failure.');
+        }
+    }
 }
