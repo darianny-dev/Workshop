@@ -211,7 +211,6 @@ private class OpportunityPaymentStatusServiceTest {
                 new TestDataFactory.OpportunityBuilder()
                     .withAccountId(acct.Id)
                     .withPaidAmount(75)
-                    .insertRecord()
                     .build()
             );
         }

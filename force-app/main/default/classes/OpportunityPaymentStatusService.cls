@@ -1,7 +1,7 @@
 /**
- * @description       : 
+ * @description       :
  * @author            : darianny@theradical1s.com
- * @group             : 
+ * @group             :
  * @last modified on  : 05-15-2026
  * @last modified by  : darianny@theradical1s.com
 **/
@@ -15,38 +15,68 @@ public with sharing class OpportunityPaymentStatusService {
             return;
         }
 
-        Map<Id, Opportunity> opportunitiesById = new Map<Id, Opportunity>();
-        Set<Id> opportunityIds = new Set<Id>();
+        Map<Id, Opportunity> eligibleOpportunitiesById =
+            getEligibleOpportunitiesById(newList);
 
-        for (Opportunity opp : newList) {
-            if (opp.Id == null || opp.Paid_Percentage__c == null) {
-                continue;
-            }
-
-            if (opp.Paid_Percentage__c >= 75) {
-                opportunitiesById.put(opp.Id, opp);
-                opportunityIds.add(opp.Id);
-            }
-        }
-
-        if (opportunityIds.isEmpty()) {
+        if (eligibleOpportunitiesById.isEmpty()) {
             return;
         }
 
-        List<Case> relatedCases = [
+        List<Case> relatedCases =
+            getCasesRelatedToOpportunities(eligibleOpportunitiesById.keySet());
+
+        List<Case> casesToUpdate =
+            buildCaseStatusUpdates(relatedCases, eligibleOpportunitiesById);
+
+        updateCasesAndNotify(casesToUpdate);
+    }
+
+    private static Map<Id, Opportunity> getEligibleOpportunitiesById(
+        List<Opportunity> opportunities
+    ) {
+        Map<Id, Opportunity> eligibleOpportunitiesById =
+            new Map<Id, Opportunity>();
+
+        for (Opportunity opp : opportunities) {
+            if (!isEligibleOpportunity(opp)) {
+                continue;
+            }
+
+            eligibleOpportunitiesById.put(opp.Id, opp);
+        }
+
+        return eligibleOpportunitiesById;
+    }
+
+    private static Boolean isEligibleOpportunity(Opportunity opp) {
+        return opp != null &&
+            opp.Id != null &&
+            opp.Paid_Percentage__c != null &&
+            opp.Paid_Percentage__c >= 75;
+    }
+
+    private static List<Case> getCasesRelatedToOpportunities(
+        Set<Id> opportunityIds
+    ) {
+        return [
             SELECT Id, Status, Opportunity__c
             FROM Case
             WHERE Opportunity__c IN :opportunityIds
         ];
+    }
 
-        CaseStatusTransitionEvaluator evaluator = new CaseStatusTransitionEvaluator();
+    private static List<Case> buildCaseStatusUpdates(
+        List<Case> relatedCases,
+        Map<Id, Opportunity> opportunitiesById
+    ) {
+        CaseStatusTransitionEvaluator evaluator =
+            new CaseStatusTransitionEvaluator();
 
         List<Case> casesToUpdate = new List<Case>();
 
         for (Case relatedCase : relatedCases) {
-            Opportunity relatedOpp = opportunitiesById.get(
-                relatedCase.Opportunity__c
-            );
+            Opportunity relatedOpp =
+                opportunitiesById.get(relatedCase.Opportunity__c);
 
             if (relatedOpp == null) {
                 continue;
@@ -69,13 +99,18 @@ public with sharing class OpportunityPaymentStatusService {
             );
         }
 
-        if (!casesToUpdate.isEmpty()) {
-            update casesToUpdate;
+        return casesToUpdate;
+    }
 
-            CaseStatusNotificationService notificationService =
-                new CaseStatusNotificationService();
-
-            notificationService.notifyStatusChanges(casesToUpdate);
+    private static void updateCasesAndNotify(List<Case> casesToUpdate) {
+        if (casesToUpdate == null || casesToUpdate.isEmpty()) {
+            return;
         }
+
+        update casesToUpdate;
+
+        CaseStatusNotificationService notificationService = new CaseStatusNotificationService();
+
+        notificationService.notifyStatusChanges(casesToUpdate);
     }
 }
