@@ -43,4 +43,29 @@ public class TestDataFactory {
         insert c;
         return c;
     }
+
+    public static Opportunity buildOpportunity(
+        Id accountId,
+        Decimal paidPercentage
+    ) {
+        return new Opportunity(
+            Name = 'Test Opportunity',
+            AccountId = accountId,
+            StageName = 'Prospecting',
+            CloseDate = Date.today().addDays(30),
+            Paid_Percentage__c = paidPercentage
+        );
+    }
+
+    public static Case buildCase(
+        Id opportunityId,
+        String status
+    ) {
+        return new Case(
+            Subject = 'Test Case',
+            Status = status,
+            Origin = 'Phone',
+            Opportunity__c = opportunityId
+        );
+    }
 }
