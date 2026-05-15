@@ -74,7 +74,7 @@ public class TestDataFactory {
                 AccountId = acct.Id,
                 StageName = 'Prospecting',
                 CloseDate = Date.today().addDays(30),
-                Paid_Amount__c = 0
+                Paid_Percentage__c = 0
             );
         }
 
@@ -98,8 +98,8 @@ public class TestDataFactory {
             return this;
         }
 
-        public OpportunityBuilder withPaidAmount(Decimal value) {
-            opp.Paid_Amount__c = value;
+        public OpportunityBuilder withPaidPercentage(Decimal value) {
+            opp.Paid_Percentage__c = value;
             return this;
         }
 

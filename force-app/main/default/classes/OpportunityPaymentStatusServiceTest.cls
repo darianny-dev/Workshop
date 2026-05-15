@@ -14,7 +14,7 @@ private class OpportunityPaymentStatusServiceTest {
 
         Opportunity opp = new TestDataFactory.OpportunityBuilder()
             .withAccountId(acct.Id)
-            .withPaidAmount(75)
+            .withPaidPercentage(75)
             .insertRecord();
 
         Case relatedCase = new TestDataFactory.CaseBuilder()
@@ -28,7 +28,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Amount__c = 0
+                    Paid_Percentage__c = 0
                 )
             }
         );
@@ -53,7 +53,7 @@ private class OpportunityPaymentStatusServiceTest {
 
         Opportunity opp = new TestDataFactory.OpportunityBuilder()
             .withAccountId(acct.Id)
-            .withPaidAmount(50)
+            .withPaidPercentage(50)
             .insertRecord();
 
         Case relatedCase = new TestDataFactory.CaseBuilder()
@@ -68,7 +68,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Amount__c = 0
+                    Paid_Percentage__c = 0
                 )
             }
         );
@@ -94,7 +94,7 @@ private class OpportunityPaymentStatusServiceTest {
 
         Opportunity opp = new TestDataFactory.OpportunityBuilder()
             .withAccountId(acct.Id)
-            .withPaidAmount(75)
+            .withPaidPercentage(75)
             .insertRecord();
 
         Case relatedCase = new TestDataFactory.CaseBuilder()
@@ -109,7 +109,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Amount__c = 0
+                    Paid_Percentage__c = 0
                 )
             }
         );
@@ -135,7 +135,7 @@ private class OpportunityPaymentStatusServiceTest {
 
         Opportunity opp = new TestDataFactory.OpportunityBuilder()
             .withAccountId(acct.Id)
-            .withPaidAmount(75)
+            .withPaidPercentage(75)
             .insertRecord();
 
         Test.startTest();
@@ -145,7 +145,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Amount__c = 0
+                    Paid_Percentage__c = 0
                 )
             }
         );
@@ -165,7 +165,7 @@ private class OpportunityPaymentStatusServiceTest {
         Opportunity opp = new TestDataFactory.OpportunityBuilder()
             .withAccountId(acct.Id)
             .insertRecord();
-        opp.Paid_Amount__c = null;
+        opp.Paid_Percentage__c = null;
 
         Case relatedCase = new TestDataFactory.CaseBuilder()
             .withOpportunityId(opp.Id)
@@ -179,7 +179,7 @@ private class OpportunityPaymentStatusServiceTest {
             new Map<Id, Opportunity>{
                 opp.Id => new Opportunity(
                     Id = opp.Id,
-                    Paid_Amount__c = 0
+                    Paid_Percentage__c = 0
                 )
             }
         );
@@ -210,7 +210,7 @@ private class OpportunityPaymentStatusServiceTest {
             opportunities.add(
                 new TestDataFactory.OpportunityBuilder()
                     .withAccountId(acct.Id)
-                    .withPaidAmount(75)
+                    .withPaidPercentage(75)
                     .build()
             );
         }
@@ -232,7 +232,7 @@ private class OpportunityPaymentStatusServiceTest {
                 opp.Id,
                 new Opportunity(
                     Id = opp.Id,
-                    Paid_Amount__c = 0
+                    Paid_Percentage__c = 0
                 )
             );
         }
