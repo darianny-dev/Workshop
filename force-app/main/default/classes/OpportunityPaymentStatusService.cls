@@ -27,15 +27,28 @@ public with sharing class OpportunityPaymentStatusService {
             return;
         }
 
-        List<Case> casesToUpdate = [
+        List<Case> relatedCases = [
             SELECT Id, Status, Opportunity__c
             FROM Case
             WHERE Opportunity__c IN :opportunityIds
-            AND Status != 'Closed'
         ];
 
-        for (Case c : casesToUpdate) {
-            c.Status = 'Compliance Call';
+        List<Case> casesToUpdate = new List<Case>();
+
+        for (Case c : relatedCases) {
+            Opportunity relatedOpp = opportunitiesById.get(c.Opportunity__c);
+
+            String nextStatus = CaseStatusTransitionEvaluator.determineNextStatus(
+                relatedOpp.Paid_Percentage__c,
+                c.Status
+            );
+
+            if (nextStatus != null) {
+                casesToUpdate.add(new Case(
+                    Id = c.Id,
+                    Status = nextStatus
+                ));
+            }
         }
 
         if (!casesToUpdate.isEmpty()) {

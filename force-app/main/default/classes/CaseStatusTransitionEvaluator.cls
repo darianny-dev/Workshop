@@ -11,6 +11,18 @@ public with sharing class CaseStatusTransitionEvaluator {
         Decimal paidPercentage,
         String currentStatus
     ) {
+        if (paidPercentage == null || String.isBlank(currentStatus)) {
+            return null;
+        }
+
+        if (currentStatus == 'Closed') {
+            return null;
+        }
+
+        if (paidPercentage >= 75) {
+            return 'Compliance Call';
+        }
+
         return null;
     }
 }
